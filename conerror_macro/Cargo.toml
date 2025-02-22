@@ -1,0 +1,17 @@
+[package]
+name = "conerror_macro"
+version = "0.1.8"
+edition = "2021"
+description = "Provides a macro that automatically adds context to errors"
+license = "MIT"
+repository = "https://github.com/qtoolco/conerror"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.71"
+quote = "1.0.33"
+syn = { version = "2.0.43", features = ["full", "visit-mut"] }
