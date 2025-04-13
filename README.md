@@ -4,6 +4,12 @@
 making it easier to trace and debug issues by including file names, line numbers, 
 and function names in error messages.
 
+## Install
+
+```bash
+cargo add conerror
+```
+
 ## Features
 
 - Automatically adds context to errors.
