@@ -215,3 +215,10 @@ impl Display for Location {
         )
     }
 }
+
+#[cfg(feature = "wasm-bindgen")]
+impl From<Error> for wasm_bindgen::JsValue {
+    fn from(value: Error) -> Self {
+        value.to_string().into()
+    }
+}
