@@ -125,6 +125,38 @@ impl Error {
     pub fn location(&self) -> Option<&[Location]> {
         self.0.location.as_ref().map(|v| v.as_slice())
     }
+
+    /// Returns the error message
+    pub fn message(&self) -> String {
+        let mut s = String::with_capacity(self.0.context.len() * 16);
+        for c in self.0.context.iter().rev() {
+            s.push_str(c);
+            s.push_str(": ");
+        }
+        s.push_str(&self.0.source.to_string());
+        s
+    }
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for Error {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeStruct;
+
+        let mut s = serializer.serialize_struct("Error", 2)?;
+        s.serialize_field("message", &self.message())?;
+        let location = self
+            .0
+            .location
+            .as_ref()
+            .map(|v| v.iter().map(Location::to_string).collect())
+            .unwrap_or(Vec::new());
+        s.serialize_field("location", &location)?;
+        s.end()
+    }
 }
 
 impl Debug for Error {

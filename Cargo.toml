@@ -10,7 +10,9 @@ repository = "https://github.com/qtoolco/conerror"
 
 [dependencies]
 conerror_macro = {  path = "conerror_macro" }
+serde = { version = "1.0.219", optional = true }
 
 [features]
 default = ["send_sync"]
 send_sync = []
+serde = ["dep:serde"]
