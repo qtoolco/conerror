@@ -9,6 +9,26 @@ pub use conerror_macro::conerror;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+use inner::*;
+
+#[cfg(feature = "send_sync")]
+mod inner {
+    pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
+
+    pub trait ErrorTrait: std::error::Error + Send + Sync {}
+
+    impl<T: std::error::Error + Send + Sync> ErrorTrait for T {}
+}
+
+#[cfg(not(feature = "send_sync"))]
+mod inner {
+    pub type BoxError = Box<dyn std::error::Error>;
+
+    pub trait ErrorTrait: std::error::Error {}
+
+    impl<T: std::error::Error> ErrorTrait for T {}
+}
+
 /// Represents an error with additional location information.
 pub struct Error(Box<Inner>);
 
@@ -30,7 +50,7 @@ impl Error {
         module: &'static str,
     ) -> Self
     where
-        T: Into<Box<dyn std::error::Error + Send + Sync>>,
+        T: Into<BoxError>,
     {
         Self(Box::new(Inner {
             source: error.into(),
@@ -47,7 +67,7 @@ impl Error {
     /// Creates a new [Error] without location information.
     pub fn plain<T>(error: T) -> Self
     where
-        T: Into<Box<dyn std::error::Error + Send + Sync>>,
+        T: Into<BoxError>,
     {
         Self(Box::new(Inner {
             source: error.into(),
@@ -76,7 +96,7 @@ impl Error {
         module: &'static str,
     ) -> Self
     where
-        T: std::error::Error + Send + Sync + 'static,
+        T: ErrorTrait + 'static,
     {
         if TypeId::of::<T>() == TypeId::of::<Self>() {
             let error = ManuallyDrop::new(error);
@@ -139,7 +159,7 @@ impl std::error::Error for Error {
 }
 
 struct Inner {
-    source: Box<dyn std::error::Error + Send + Sync>,
+    source: BoxError,
     location: Option<Vec<Location>>,
     context: Vec<String>,
 }
