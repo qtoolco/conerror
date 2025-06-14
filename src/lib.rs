@@ -216,9 +216,23 @@ impl Display for Location {
     }
 }
 
-#[cfg(feature = "wasm-bindgen")]
+#[cfg(all(
+    feature = "wasm-bindgen",
+    any(not(feature = "serde"), not(feature = "serde-wasm-bindgen"))
+))]
 impl From<Error> for wasm_bindgen::JsValue {
     fn from(value: Error) -> Self {
         value.to_string().into()
+    }
+}
+
+#[cfg(all(
+    feature = "serde",
+    feature = "wasm-bindgen",
+    feature = "serde-wasm-bindgen"
+))]
+impl From<Error> for wasm_bindgen::JsValue {
+    fn from(value: Error) -> Self {
+        serde_wasm_bindgen::to_value(&value).expect("to value error")
     }
 }
